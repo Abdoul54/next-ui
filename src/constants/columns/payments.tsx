@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { DataTableColumnHeader } from "@/components/data-table-column-header"
+import { Badge } from "@/components/ui/badge"
 
 // This type is used to define the shape of our data.
 export type Payment = {
@@ -39,22 +40,43 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Status" />
+    ),
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string
+      
+      const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
+        pending: { label: "Pending", variant: "secondary" },
+        processing: { label: "Processing", variant: "default" },
+        success: { label: "Success", variant: "default" },
+        failed: { label: "Failed", variant: "destructive" },
+      }
+      
+      const { label, variant } = statusMap[status] || { label: status, variant: "secondary" }
+      
+      return <Badge variant={variant}>{label}</Badge>
+    },
   },
   {
     accessorKey: "email",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Email" />
     ),
+    cell: ({ row }) => {
+      return <div className="font-medium">{row.getValue("email")}</div>
+    },
   },
   {
     accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Amount" />
+    ),
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"))
-      const formatted = new Intl.NumberFormat("fr-MA", {
+      const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
-        currency: "MAD",
+        currency: "USD",
       }).format(amount)
  
       return <div className="text-right font-medium">{formatted}</div>
